@@ -6,6 +6,14 @@ api_version: 1
 threadsafe: true
 
 handlers:
+# Static handlers
+- url: /stylesheets
+  static_dir: static/stylesheets
+
+- url: /(robots\.txt|favicon\.ico)
+  static_files: static/\1
+  upload: static/(robots\.txt|favicon\.ico)
+
 # Script handlers
 - url: .*
   script: main.application
@@ -13,14 +21,10 @@ handlers:
 - url: /index\.html
   script: main.application
 
-# Static handlers
-- url: /stylesheets
-  static_dir: static/stylesheets
-
-- url: /(favicon\.ico|robots\.txt)
-  static_files: static/\1
-  upload: static/(favicon\.ico|robots\.txt)
 
 libraries:
+# Third party libraries: https://developers.google.com/appengine/docs/python/tools/libraries27
 - name: webapp2
   version: "latest" # 2.5.2
+- name: jinja2
+  version: "latest" # 2.6

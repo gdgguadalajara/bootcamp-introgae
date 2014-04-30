@@ -7,42 +7,19 @@
 
     @jn6h - Nazareth Gutiérrez
                                       """
-import webapp2
+import os
 import cgi
 import urllib
 
+import webapp2
+import jinja2
+
 from google.appengine.ext import ndb
 
-HEADER_PAGE_HTML = """
-<!doctype html>
-<html>
-  <body>
-"""
+jinja_environment = jinja2.Environment(
+  autoescape=True,
+  loader=jinja2.FileSystemLoader(os.path.join(os.path.dirname(__file__), 'templates')))
 
-FORM_HTML = """
-    <form action="/new" method="post">
-      <div>
-        <label>
-          Notebook:
-          <input type="text" name="stock_name" value="%s">
-        </label>
-      </div>
-      <div>
-        <label>
-          TODO:
-          <input type="text" name="todo">
-        </label>
-      </div>
-      <div>
-        <input type="submit" value="Agregar">
-      </div>
-    </form>
-"""
-
-FOOTER_PAGE_HTML = """
-  </body>
-</html>
-"""
 
 DEFAULT_STOCK_NAME = 'default_notebook'
 
@@ -59,7 +36,6 @@ class MainPage(webapp2.RequestHandler):
 
   def get(self):
     self.response.headers['Content-Type'] = 'text/html; charset=UTF-8'
-    self.response.write(HEADER_PAGE_HTML)
 
     stock_name = self.request.get('stock_name', DEFAULT_STOCK_NAME)
     ancestor_key = notebook_key(stock_name)
@@ -67,14 +43,13 @@ class MainPage(webapp2.RequestHandler):
     todo_query = Todo.query(ancestor=ancestor_key).order(-Todo.date)
     todos = todo_query.fetch(20)
 
-    self.response.write(FORM_HTML % stock_name)
+    template_values = {
+      'todos': todos,
+      'stock_name': urllib.quote_plus(stock_name)
+    }
 
-    self.response.write('<ul>')
-    for todo in todos:
-      self.response.write('<li>%s</li>' % cgi.escape(todo.description))
-    self.response.write('</ul>')
-
-    self.response.write(FOOTER_PAGE_HTML)
+    template = jinja_environment.get_template('todos.html')
+    self.response.write(template.render(template_values))
 
 
 class NewTodoHandler(webapp2.RequestHandler):

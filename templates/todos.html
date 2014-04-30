@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+{% block body %}
+
+  <form action="/new" method="post">
+    <div>
+      <label>
+        Notebook:
+        <input type="text" name="stock_name" value="{{ stock_name }}">
+      </label>
+    </div>
+    <div>
+      <label>
+        TODO:
+        <input type="text" name="todo">
+      </label>
+    </div>
+    <div>
+      <input type="submit" value="Agregar">
+    </div>
+  </form>
+
+  <ul>
+  {% for todo in todos %}
+    <li>{{ todo.description }}</li>
+  {% endfor %}
+  </ul>
+{% endblock %}
