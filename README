@@ -1,0 +1,17 @@
+
+GDG Guadalajra, 2014
+http://gdgguadalajara.org
+
+Codelab - Introducción a Google App Engine
+
+Introducción
+  * ¿Qué es Google App Engine?
+  * ¿Que debo saber de Google App Engine?
+
+Codelab
+  * Construir una aplicación utilizando Python
+  * Uso de framework webapp2
+  * Uso del App Engine datastore
+  * Integración de Users API
+  * Uso de Jinja2, motor de templates para tu aplicación
+  * Deployd
