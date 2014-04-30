@@ -1,6 +1,8 @@
 {% extends "layout.html" %}
 {% block body %}
-
+  <div>
+    <p>Bienvenido {{ current_user }} (<a href="{{ logout_url }}">Salir</a>)</p>
+  </div>
   <form action="/new" method="post">
     <div>
       <label>

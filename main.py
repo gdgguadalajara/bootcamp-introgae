@@ -14,6 +14,7 @@ import urllib
 import webapp2
 import jinja2
 
+from google.appengine.api import users
 from google.appengine.ext import ndb
 
 jinja_environment = jinja2.Environment(
@@ -29,6 +30,7 @@ def notebook_key(stock_name=DEFAULT_STOCK_NAME):
 
 class Todo(ndb.Model):
   description = ndb.StringProperty(indexed=True)
+  author = ndb.UserProperty()
   date = ndb.DateTimeProperty(auto_now_add=True)
 
 
@@ -36,6 +38,13 @@ class MainPage(webapp2.RequestHandler):
 
   def get(self):
     self.response.headers['Content-Type'] = 'text/html; charset=UTF-8'
+
+    current_user = users.get_current_user()
+    if not current_user:
+      login_url = users.create_login_url(self.request.uri)
+      self.redirect(login_url)
+
+    logout_url = users.create_login_url(self.request.uri)
 
     stock_name = self.request.get('stock_name', DEFAULT_STOCK_NAME)
     ancestor_key = notebook_key(stock_name)
@@ -45,7 +54,9 @@ class MainPage(webapp2.RequestHandler):
 
     template_values = {
       'todos': todos,
-      'stock_name': urllib.quote_plus(stock_name)
+      'stock_name': urllib.quote_plus(stock_name),
+      'logout_url': logout_url,
+      'current_user': current_user.nickname()
     }
 
     template = jinja_environment.get_template('todos.html')
@@ -58,6 +69,10 @@ class NewTodoHandler(webapp2.RequestHandler):
     stock_name = self.request.get('stock_name', DEFAULT_STOCK_NAME)
 
     newTodo = Todo(parent=notebook_key(stock_name))
+
+    if users.get_current_user():
+      newTodo.author = users.get_current_user()
+
     newTodo.description = self.request.get('todo')
     newTodo.put()
 
