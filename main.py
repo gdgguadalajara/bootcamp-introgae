@@ -43,24 +43,24 @@ class MainPage(webapp2.RequestHandler):
     if not current_user:
       login_url = users.create_login_url(self.request.uri)
       self.redirect(login_url)
+    else:
+      logout_url = users.create_logout_url(self.request.uri)
 
-    logout_url = users.create_login_url(self.request.uri)
+      stock_name = self.request.get('stock_name', DEFAULT_STOCK_NAME)
+      ancestor_key = notebook_key(stock_name)
 
-    stock_name = self.request.get('stock_name', DEFAULT_STOCK_NAME)
-    ancestor_key = notebook_key(stock_name)
+      todo_query = Todo.query(ancestor=ancestor_key).order(-Todo.date)
+      todos = todo_query.fetch(20)
 
-    todo_query = Todo.query(ancestor=ancestor_key).order(-Todo.date)
-    todos = todo_query.fetch(20)
+      template_values = {
+        'todos': todos,
+        'stock_name': urllib.quote_plus(stock_name),
+        'logout_url': logout_url,
+        'current_user': current_user.nickname()
+      }
 
-    template_values = {
-      'todos': todos,
-      'stock_name': urllib.quote_plus(stock_name),
-      'logout_url': logout_url,
-      'current_user': current_user.nickname()
-    }
-
-    template = jinja_environment.get_template('todos.html')
-    self.response.write(template.render(template_values))
+      template = jinja_environment.get_template('todos.html')
+      self.response.write(template.render(template_values))
 
 
 class NewTodoHandler(webapp2.RequestHandler):
